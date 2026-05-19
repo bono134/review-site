@@ -837,3 +837,81 @@ body.theme_light {
     padding: 3rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
+
+/* ===== 반응형 (모바일) ===== */
+
+/* 모바일 줄바꿈용: 기본은 inline 유지 */
+.break_mobile { display: inline; }
+
+@media (max-width: 768px) {
+
+    /* --- index.html --- */
+    .hero_title {
+        font-size: 3.8rem;
+        letter-spacing: -1px;
+    }
+
+    /* "읽는 우리" → "읽는" + 줄바꿈 + "우리" */
+    .break_mobile {
+        display: block;
+    }
+
+    .stats_container { gap: 2rem; }
+    .stat_number { font-size: 2.6rem; }
+
+    .hero_top_text { font-size: 0.75rem; letter-spacing: 2px; }
+
+    /* --- reviews.html 하이라이트 카드 세로 배치 --- */
+    .latest_highlights {
+        grid-template-columns: 1fr;
+    }
+
+    /* --- 필터바 --- */
+    .filter_bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.8rem;
+    }
+    .search_input { width: 100%; }
+
+    /* --- 테이블 --- */
+    .board_page { padding: 8rem 3% 4rem; }
+
+    .review_table th,
+    .review_table td {
+        padding: 0.6rem 0.3rem;
+        font-size: 0.8rem;
+    }
+
+    /* 날짜: 줄바꿈 허용, 너비 축소 */
+    .col_date {
+        white-space: normal;
+        word-break: break-all;
+        min-width: 52px;
+        width: 52px;
+    }
+
+    /* 번호 컬럼 숨기기 */
+    .col_num { display: none; }
+
+    /* 제목 왼쪽 정렬 유지, 너비 확보 */
+    .col_title { width: auto; }
+
+    /* form/detail 페이지 패딩 */
+    .form_page_container,
+    .detail_page_container {
+        padding: 8rem 4% 4rem;
+    }
+
+    .form_box,
+    .detail_box {
+        padding: 1.5rem;
+    }
+
+    .detail_info_grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .detail_title { font-size: 1.5rem; }
+    .detail_header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+}

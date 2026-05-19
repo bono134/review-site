@@ -68,90 +68,7 @@
         </footer>
     </div>
 
-    <!-- 등록/수정 모달 -->
-    <dialog class="review_modal" id="review_modal">
-        <div class="modal_content">
-            <h2 class="modal_title" id="form_modal_title">리뷰 등록</h2>
-            <form class="review_form" id="review_form">
-                <label for="reviewer_select">작성자</label>
-                <select id="reviewer_select" class="form_input">
-                    <option value="">선택</option>
-                    <option value="로사">로사</option>
-                    <option value="혜현">혜현</option>
-                    <option value="지수">지수</option>
-                </select>
 
-                <label for="meeting_date_input">모임 날짜</label>
-                <input type="date" id="meeting_date_input" class="form_input">
-
-                <label for="book_title_input">도서명</label>
-                <input type="text" id="book_title_input" class="form_input" placeholder="도서명 입력">
-
-                <label for="author_input">저자</label>
-                <input type="text" id="author_input" class="form_input" placeholder="저자 입력">
-
-                <label for="thoughts_input">읽은 소감</label>
-                <textarea id="thoughts_input" class="form_input textarea_large" placeholder="소감을 자유롭게 남겨주세요"></textarea>
-
-                <label for="other_input">기타</label>
-                <textarea id="other_input" class="form_input textarea_small" placeholder="기타 메모"></textarea>
-
-                <label for="one_line_input">한줄평</label>
-                <input type="text" id="one_line_input" class="form_input" placeholder="한줄평을 남겨주세요">
-
-                <label for="rating_input">별점</label>
-                <input type="text" id="rating_input" class="form_input" placeholder="예: 4.5">
-
-                <div class="form_actions full_width">
-                    <button type="button" class="cancel_btn" id="modal_cancel_btn">취소</button>
-                    <button type="submit" class="submit_btn" id="form_submit_btn">등록</button>
-                </div>
-            </form>
-        </div>
-    </dialog>
-
-    <!-- 상세 뷰 모달 -->
-    <dialog class="detail_modal" id="detail_modal">
-        <div class="detail_header">
-            <div class="detail_title" id="detail_book_title">제목</div>
-            <div class="detail_actions">
-                <button class="submit_btn" id="detail_edit_btn">수정</button>
-                <button class="cancel_btn" id="detail_close_btn">닫기</button>
-            </div>
-        </div>
-        <div class="detail_info_grid">
-            <div class="info_item">
-                <span class="info_label">작성자</span>
-                <span class="info_value" id="detail_reviewer">-</span>
-            </div>
-            <div class="info_item">
-                <span class="info_label">저자</span>
-                <span class="info_value" id="detail_author">-</span>
-            </div>
-            <div class="info_item">
-                <span class="info_label">모임 날짜</span>
-                <span class="info_value" id="detail_date">-</span>
-            </div>
-            <div class="info_item">
-                <span class="info_label">별점</span>
-                <span class="info_value rating" id="detail_rating">-</span>
-            </div>
-        </div>
-        <div class="detail_content_area">
-            <div class="detail_section" id="detail_oneline_section">
-                <div class="detail_section_title">한줄평</div>
-                <div class="detail_text oneline" id="detail_oneline">-</div>
-            </div>
-            <div class="detail_section">
-                <div class="detail_section_title">읽은 소감</div>
-                <div class="detail_text" id="detail_thoughts">-</div>
-            </div>
-            <div class="detail_section" id="detail_other_section">
-                <div class="detail_section_title">기타</div>
-                <div class="detail_text" id="detail_other">-</div>
-            </div>
-        </div>
-    </dialog>
 
     <script type="module">
         import {
@@ -161,8 +78,6 @@
         } from './firebase-config.js';
 
         // ── 전역 상태
-        let currentEditId       = null;
-        let currentEditReviewer = null;
         let allReviews          = [];
         const PAGE_SIZE         = 20;
         let visibleCount        = PAGE_SIZE;
@@ -311,125 +226,23 @@
             renderTable(allReviews);
         }
 
-        // ── 상세 뷰 모달
-        const detailModal = document.getElementById('detail_modal');
-
-        async function openDetailModal(reviewer, id) {
-            const r = await fetchReviewById(reviewer, id);
-            if (!r) return;
-            document.getElementById('detail_book_title').textContent = r.title;
-            document.getElementById('detail_reviewer').textContent   = r.reviewer;
-            document.getElementById('detail_author').textContent     = r.author || '-';
-            document.getElementById('detail_date').textContent       = r.date;
-            document.getElementById('detail_rating').textContent     = r.rating || '-';
-            document.getElementById('detail_thoughts').textContent   = r.thoughts || '';
-            document.getElementById('detail_oneline').textContent    = r.oneLine ? `"${r.oneLine}"` : '-';
-            document.getElementById('detail_other').textContent      = r.other || '';
-            document.getElementById('detail_oneline_section').style.display =
-                r.oneLine && r.oneLine.trim() ? '' : 'none';
-            document.getElementById('detail_other_section').style.display =
-                r.other && r.other.trim() ? '' : 'none';
-            detailModal.dataset.currentId       = id;
-            detailModal.dataset.currentReviewer = reviewer;
-            detailModal.showModal();
+        // ── 상세 페이지 이동
+        function goToDetail(reviewer, id) {
+            window.location.href = `detail.html?reviewer=${encodeURIComponent(reviewer)}&id=${encodeURIComponent(id)}`;
         }
 
         tbody.addEventListener('click', e => {
             const cell = e.target.closest('.col_title[data-id]');
-            if (cell) openDetailModal(cell.dataset.reviewer, cell.dataset.id);
+            if (cell) goToDetail(cell.dataset.reviewer, cell.dataset.id);
         });
 
         document.getElementById('latest_highlights').addEventListener('click', e => {
             const card = e.target.closest('.highlight_card[data-id]');
-            if (card) openDetailModal(card.dataset.reviewer, card.dataset.id);
+            if (card) goToDetail(card.dataset.reviewer, card.dataset.id);
         });
 
-        document.getElementById('detail_close_btn').addEventListener('click', () => detailModal.close());
-
-        document.getElementById('detail_edit_btn').addEventListener('click', async () => {
-            const id       = detailModal.dataset.currentId;
-            const reviewer = detailModal.dataset.currentReviewer;
-            const r        = await fetchReviewById(reviewer, id);
-            if (!r) return;
-            detailModal.close();
-            openFormModal(r);
-        });
-
-        // ── 등록/수정 폼 모달
-        const reviewModal = document.getElementById('review_modal');
-        const reviewForm  = document.getElementById('review_form');
-
-        function openFormModal(review = null) {
-            reviewForm.reset();
-            currentEditId = currentEditReviewer = null;
-            if (review) {
-                currentEditId       = review.id;
-                currentEditReviewer = review.reviewer;
-                document.getElementById('form_modal_title').textContent = '리뷰 수정';
-                document.getElementById('form_submit_btn').textContent  = '수정 완료';
-                document.getElementById('reviewer_select').value        = review.reviewer;
-                document.getElementById('meeting_date_input').value     = review.date.replace(/\./g, '-');
-                document.getElementById('book_title_input').value       = review.title;
-                document.getElementById('author_input').value           = review.author || '';
-                document.getElementById('thoughts_input').value         = review.thoughts || '';
-                document.getElementById('other_input').value            = review.other || '';
-                document.getElementById('one_line_input').value         = review.oneLine || '';
-                document.getElementById('rating_input').value           = review.rating
-                    ? review.rating.replace('★ ', '').trim() : '';
-            } else {
-                document.getElementById('form_modal_title').textContent = '리뷰 등록';
-                document.getElementById('form_submit_btn').textContent  = '등록';
-            }
-            reviewModal.scrollTop = 0;
-            reviewModal.showModal();
-        }
-
-        document.getElementById('open_register_btn').addEventListener('click', () => openFormModal());
-        document.getElementById('modal_cancel_btn').addEventListener('click', () => reviewModal.close());
-
-        reviewForm.addEventListener('submit', async e => {
-            e.preventDefault();
-            const reviewer    = document.getElementById('reviewer_select').value;
-            const meetingDate = document.getElementById('meeting_date_input').value;
-            const bookTitle   = document.getElementById('book_title_input').value;
-            const thoughts    = document.getElementById('thoughts_input').value;
-            const author      = document.getElementById('author_input').value || '-';
-            const other       = document.getElementById('other_input').value || '';
-            const ratingRaw   = document.getElementById('rating_input').value || '-';
-            const oneLine     = document.getElementById('one_line_input').value || '';
-
-            if (!reviewer || !meetingDate || !bookTitle.trim() || !thoughts.trim()) {
-                alert('데이터를 입력해주세요');
-                return;
-            }
-
-            const formattedDate = meetingDate.replace(/-/g, '.');
-            const displayRating = ratingRaw !== '-' && !ratingRaw.includes('★')
-                ? '★ ' + ratingRaw : ratingRaw;
-
-            const payload = { date: formattedDate, title: bookTitle, author, reviewer,
-                              rating: displayRating, thoughts, oneLine, other };
-
-            const submitBtn = document.getElementById('form_submit_btn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = '저장 중...';
-
-            try {
-                if (currentEditId && currentEditReviewer) {
-                    await editReview(currentEditReviewer, currentEditId, payload);
-                } else {
-                    await addReview(payload);
-                }
-                currentEditId = currentEditReviewer = null;
-                reviewModal.close();
-                await renderAll();
-            } catch (err) {
-                console.error('저장 실패:', err);
-                alert('저장 중 오류가 발생했습니다.');
-            } finally {
-                submitBtn.disabled    = false;
-                submitBtn.textContent = currentEditId ? '수정 완료' : '등록';
-            }
+        document.getElementById('open_register_btn').addEventListener('click', () => {
+            window.location.href = 'write.html';
         });
 
         // ── 필터 / 검색 / 더보기

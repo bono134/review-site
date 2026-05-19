@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리뷰 등록/수정 - 도란도란독서</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="theme_light">
+    <div class="wrap">
+        <header class="header" id="main_header">
+            <a href="index.html" class="logo"><span class="highlight">도</span>란<span class="highlight">도</span>란<span class="highlight">독</span>서</a>
+            <nav class="gnb" id="main_gnb">
+                <a href="reviews.html" class="active">리뷰</a>
+                <a href="#">예비도서</a>
+                <a href="#">어워드</a>
+            </nav>
+        </header>
+
+        <div class="container form_page_container">
+            <main class="content">
+                <div class="form_box">
+                    <h2 class="form_page_title" id="page_title">리뷰 등록</h2>
+                    <form class="review_form" id="review_form">
+                        <label for="reviewer_select">작성자</label>
+                        <select id="reviewer_select" class="form_input">
+                            <option value="">선택</option>
+                            <option value="로사">로사</option>
+                            <option value="혜현">혜현</option>
+                            <option value="지수">지수</option>
+                        </select>
+
+                        <label for="meeting_date_input">모임 날짜</label>
+                        <input type="date" id="meeting_date_input" class="form_input">
+
+                        <label for="book_title_input">도서명</label>
+                        <input type="text" id="book_title_input" class="form_input" placeholder="도서명 입력">
+
+                        <label for="author_input">저자</label>
+                        <input type="text" id="author_input" class="form_input" placeholder="저자 입력">
+
+                        <label for="thoughts_input">읽은 소감</label>
+                        <textarea id="thoughts_input" class="form_input textarea_large" placeholder="소감을 자유롭게 남겨주세요"></textarea>
+
+                        <label for="other_input">기타</label>
+                        <textarea id="other_input" class="form_input textarea_small" placeholder="기타 메모"></textarea>
+
+                        <label for="one_line_input">한줄평</label>
+                        <input type="text" id="one_line_input" class="form_input" placeholder="한줄평을 남겨주세요">
+
+                        <label for="rating_input">별점</label>
+                        <input type="text" id="rating_input" class="form_input" placeholder="예: 4.5">
+
+                        <div class="form_actions full_width">
+                            <button type="button" class="cancel_btn" id="cancel_btn">취소</button>
+                            <button type="submit" class="submit_btn" id="submit_btn">등록</button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+
+        <footer class="footer">
+            &copy; 2026 도란도란독서. All rights reserved.
+        </footer>
+    </div>
+
+    <script type="module">
+        import {
+            db,
+            collection, addDoc, getDoc,
+            updateDoc, doc, serverTimestamp
+        } from './firebase-config.js';
+
+        const postsCol = (reviewer) => collection(db, 'reviews', reviewer, 'posts');
+        const postDoc  = (reviewer, id) => doc(db, 'reviews', reviewer, 'posts', id);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const editReviewer = urlParams.get('reviewer');
+        const editId = urlParams.get('id');
+        const isEditMode = editReviewer && editId;
+
+        const form = document.getElementById('review_form');
+        const pageTitle = document.getElementById('page_title');
+        const submitBtn = document.getElementById('submit_btn');
+
+        // URL 파라미터가 있으면 기존 데이터 불러오기
+        async function loadExistingData() {
+            if (!isEditMode) return;
+            
+            pageTitle.textContent = '리뷰 수정';
+            submitBtn.textContent = '수정 완료';
+            document.getElementById('reviewer_select').disabled = true; // 수정 시 작성자 변경 불가
+            
+            try {
+                const snap = await getDoc(postDoc(editReviewer, editId));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    document.getElementById('reviewer_select').value      = data.reviewer;
+                    document.getElementById('meeting_date_input').value   = data.date ? data.date.replace(/\./g, '-') : '';
+                    document.getElementById('book_title_input').value     = data.title || '';
+                    document.getElementById('author_input').value         = data.author && data.author !== '-' ? data.author : '';
+                    document.getElementById('thoughts_input').value       = data.thoughts || '';
+                    document.getElementById('other_input').value          = data.other || '';
+                    document.getElementById('one_line_input').value       = data.oneLine || '';
+                    document.getElementById('rating_input').value         = data.rating ? data.rating.replace('★ ', '').trim() : '';
+                } else {
+                    alert('해당 리뷰를 찾을 수 없습니다.');
+                    window.location.href = 'reviews.html';
+                }
+            } catch (err) {
+                console.error('데이터 불러오기 실패:', err);
+                alert('데이터를 불러오는데 실패했습니다.');
+            }
+        }
+
+        document.getElementById('cancel_btn').addEventListener('click', () => {
+            window.location.href = 'reviews.html';
+        });
+
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+
+            const reviewer    = document.getElementById('reviewer_select').value;
+            const meetingDate = document.getElementById('meeting_date_input').value;
+            const bookTitle   = document.getElementById('book_title_input').value;
+            const thoughts    = document.getElementById('thoughts_input').value;
+            const author      = document.getElementById('author_input').value || '-';
+            const other       = document.getElementById('other_input').value || '';
+            const ratingRaw   = document.getElementById('rating_input').value || '-';
+            const oneLine     = document.getElementById('one_line_input').value || '';
+
+            if (!reviewer || !meetingDate || !bookTitle.trim() || !thoughts.trim()) {
+                alert('데이터를 입력해주세요');
+                return;
+            }
+
+            const formattedDate = meetingDate.replace(/-/g, '.');
+            const displayRating = ratingRaw !== '-' && !ratingRaw.includes('★')
+                ? '★ ' + ratingRaw : ratingRaw;
+
+            const payload = { 
+                date: formattedDate, 
+                title: bookTitle, 
+                author, 
+                reviewer,
+                rating: displayRating, 
+                thoughts, 
+                oneLine, 
+                other 
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '저장 중...';
+
+            try {
+                if (isEditMode) {
+                    await updateDoc(postDoc(editReviewer, editId), { ...payload, updatedAt: serverTimestamp() });
+                } else {
+                    await addDoc(postsCol(payload.reviewer), { ...payload, createdAt: serverTimestamp() });
+                }
+                alert(isEditMode ? '수정되었습니다.' : '등록되었습니다.');
+                window.location.href = 'reviews.html';
+            } catch (err) {
+                console.error('저장 실패:', err);
+                alert('저장 중 오류가 발생했습니다.');
+            } finally {
+                submitBtn.disabled    = false;
+                submitBtn.textContent = isEditMode ? '수정 완료' : '등록';
+            }
+        });
+
+        // ── 스크롤 헤더 이벤트
+        const wrap = document.querySelector('.wrap');
+        window.addEventListener('scroll', () => wrap.classList.toggle('scrolled', window.scrollY > 10));
+
+        // ── 실행
+        loadExistingData();
+    </script>
+</body>
+
+</html>

@@ -758,3 +758,42 @@ body.theme_light {
 .clickable_item:hover {
     color: var(--primary-color) !important;
 }
+
+/* ---------- Write Page (write.html) ---------- */
+.form_page_container {
+    padding: 10rem 5% 6rem;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.form_box {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 3rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.form_page_title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 2rem;
+    color: var(--primary-color);
+    border-bottom: 2px solid rgba(217, 156, 54, 0.3);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* ---------- Detail Page (detail.html) ---------- */
+.detail_page_container {
+    padding: 10rem 5% 6rem;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.detail_box {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 3rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}

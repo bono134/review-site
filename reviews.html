@@ -50,7 +50,7 @@
                                 <th class="col_title">책 제목</th>
                                 <th class="col_author">작가명</th>
                                 <th class="col_reviewer">작성자</th>
-                                <th class="col_rating">평균 별점</th>
+                                <th class="col_rating">별점</th>
                             </tr>
                         </thead>
                         <tbody id="review_tbody"></tbody>
@@ -118,7 +118,13 @@
             const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             
             // 날짜 내림차순 정렬 (최신이 위로 오도록)
-            return data.sort((a, b) => new Date(b.createdAt?.toDate?.() || 0) - new Date(a.createdAt?.toDate?.() || 0));
+            // 날짜(date) 내림차순 → 같은 날짜면 reviewer 순
+            return data.sort((a, b) => {
+                const da = (a.date || '').replace(/\./g, '-');
+                const db_ = (b.date || '').replace(/\./g, '-');
+                if (db_ !== da) return db_.localeCompare(da);
+                return (a.reviewer || '').localeCompare(b.reviewer || '');
+            });
         }
 
         async function fetchReviewById(reviewer, id) {

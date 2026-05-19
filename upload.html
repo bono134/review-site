@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>데이터 업로드</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; background: #1a1a2e; color: #eee; max-width: 900px; }
+  button { background: #4a9eff; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 15px; margin: 4px; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.warn { background: #ff9933; }
+  #log { background: #0d0d1a; border: 1px solid #333; border-radius: 8px; padding: 16px; margin-top: 16px; height: 500px; overflow-y: auto; font-family: monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+  .ok { color: #4cff88; } .err { color: #ff4c4c; } .info { color: #4a9eff; } .warn { color: #ffcc00; }
+  #preview { background: #0d1a0d; border: 1px solid #2a4; border-radius: 8px; padding: 12px; margin-top: 12px; font-family: monospace; font-size: 11px; max-height: 200px; overflow-y: auto; display: none; }
+</style>
+</head>
+<body>
+<h2>📚 독서모임 Firestore 업로드 v2</h2>
+<p style="color:#aaa">반드시 <b>라이브 서버</b>로 열어주세요 (Live Server 필수)</p>
+
+<div style="margin-bottom:12px">
+  <button id="btnPreview" onclick="previewData('지수','2102444171')">🔍 지수 미리보기</button>
+  <button id="btnPreview2" onclick="previewData('로사','1099748468')">🔍 로사 미리보기</button>
+  <button id="btnPreview3" onclick="previewData('혜현','631416476')">🔍 혜현 미리보기</button>
+</div>
+<div>
+  <button id="btnUpload" onclick="startUpload()">🚀 전체 업로드</button>
+  <button id="btnDelete" onclick="deleteAll()" style="background:#cc3333">🗑️ 잘못된 데이터 전체 삭제</button>
+  <button class="warn" onclick="document.getElementById('log').innerHTML=''; document.getElementById('preview').style.display='none'">🧹 로그 초기화</button>
+</div>
+
+<div id="preview"></div>
+<div id="log"><span class="info">버튼을 눌러 시작하세요.</span></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDocs, deleteDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCjkT-j0eslZs0K_59emmtM3wepyNRJ38M",
+  authDomain: "my-review-220d1.firebaseapp.com",
+  projectId: "my-review-220d1",
+  storageBucket: "my-review-220d1.firebasestorage.app",
+  messagingSenderId: "373222913403",
+  appId: "1:373222913403:web:d12feef01d0ba66ed8b9de"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const SHEET_ID = "1qTmSk_P33wvn2jk5ZvOBMgbbu9YYDEwzFJxOcfX5m74";
+
+// ── 견고한 RFC 4180 CSV 파서 ──────────────────────────────
+function parseCSV(text) {
+  // 줄바꿈 통일
+  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  const rows = [];
+  let row = [], field = "", inQuote = false, i = 0;
+  while (i < text.length) {
+    const ch = text[i];
+    if (inQuote) {
+      if (ch === '"') {
+        if (text[i+1] === '"') { field += '"'; i += 2; continue; } // escaped quote
+        else { inQuote = false; i++; continue; }                   // closing quote
+      }
+      field += ch;                                                  // inside quote
+    } else {
+      if (ch === '"') { inQuote = true; i++; continue; }
+      if (ch === ',') { row.push(field); field = ""; i++; continue; }
+      if (ch === '\n') {
+        row.push(field); rows.push(row);
+        row = []; field = ""; i++; continue;
+      }
+      field += ch;
+    }
+    i++;
+  }
+  if (field || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+// ── 구글시트 CSV 가져오기 ──────────────────────────────────
+async function fetchSheet(gid) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status} - 스프레드시트가 공개 설정인지 확인하세요`);
+  return res.text();
+}
+
+// ── 데이터 행 추출 ──────────────────────────────────────────
+function extractDataRows(rows) {
+  return rows.filter(r => r.length >= 2 && /^\d{4}\.\d{2}/.test((r[1] || "").trim()));
+}
+
+// ── 행 → 오브젝트 변환 ──────────────────────────────────────
+// 스프레드시트 컬럼: [0]=empty [1]=날짜 [2]=도서명 [3]=저자 [4]=내용점검 [5]=읽은소감 [6]=기타 [7]=한줄평 [8]=별점
+function rowToDoc(r, reviewer) {
+  const clean = idx => (r[idx] || "").trim().replace(/^[-]+$/, ""); // "-" 단독은 빈값 처리
+  return {
+    reviewer,
+    date:     clean(1),
+    title:    clean(2),
+    author:   clean(3),
+    check:    clean(4),   // 내용점검 (detail.html: r.check)
+    thoughts: clean(5),  // 읽은소감 (detail.html: r.thoughts, reviews.html: r.thoughts)
+    other:    clean(6),  // 기타     (detail.html: r.other)
+    oneLine:  clean(7),  // 한줄평   (detail.html: r.oneLine, reviews.html: r.oneLine)
+    rating:   parseFloat(clean(8)) || 0, // 별점 숫자
+  };
+}
+
+// ── 로그 헬퍼 ──────────────────────────────────────────────
+function log(msg, type = "info") {
+  const el = document.getElementById("log");
+  el.innerHTML += `<span class="${type}">[${new Date().toLocaleTimeString()}] ${msg}\n</span>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+// ── 미리보기 ───────────────────────────────────────────────
+window.previewData = async function(name, gid) {
+  log(`📄 ${name} 미리보기 로딩...`);
+  try {
+    const text  = await fetchSheet(gid);
+    const rows  = parseCSV(text);
+    const dRows = extractDataRows(rows);
+    log(`${name}: ${dRows.length}건 감지`, "ok");
+
+    const prev = document.getElementById("preview");
+    prev.style.display = "block";
+    const sample = dRows.slice(0, 3).map(r => {
+      const d = rowToDoc(r, name);
+      return `[${d.date}] ${d.title}\n  저자: ${d.author}\n  내용점검(check): ${d.check.substring(0,50)}...\n  읽은소감(thoughts): ${d.thoughts.substring(0,50)}...\n  한줄평(oneLine): ${d.oneLine} / 별점: ${d.rating}`;
+    }).join("\n\n");
+    prev.textContent = `=== ${name} 샘플 (처음 3건) ===\n${sample}`;
+  } catch(e) {
+    log(`❌ 미리보기 실패: ${e.message}`, "err");
+  }
+};
+
+// ── 업로드 ─────────────────────────────────────────────────
+async function uploadReviewer(name, gid) {
+  log(`\n─── ${name} 업로드 시작 ───`, "info");
+  const text  = await fetchSheet(gid);
+  const rows  = parseCSV(text);
+  const dRows = extractDataRows(rows);
+  log(`${name}: ${dRows.length}건 파싱됨`, "info");
+
+  let ok = 0, fail = 0;
+  for (const r of dRows) {
+    const d = rowToDoc(r, name);
+    if (!d.title) { log(`  ⚠️ 제목 없는 행 스킵`, "warn"); continue; }
+
+    const docId = `${name}_${d.date}_${d.title}`
+      .replace(/[\s\/\\#$.[\]]/g, "_").substring(0, 80);
+    try {
+      await setDoc(doc(db, "reviews", name, "posts", docId), {
+        ...d,
+        createdAt: serverTimestamp()
+      });
+      ok++;
+      log(`  ✅ [${d.date}] ${d.title} (내용점검:${d.check.length}자 / 소감:${d.thoughts.length}자 / 한줄평:${d.oneLine.length}자 / 별점:${d.rating})`, "ok");
+    } catch(e) {
+      fail++;
+      log(`  ❌ ${d.title}: ${e.message}`, "err");
+    }
+    await new Promise(r => setTimeout(r, 120)); // rate limit
+  }
+  log(`${name} 완료: 성공 ${ok}건, 실패 ${fail}건\n`, fail > 0 ? "warn" : "ok");
+  return { ok, fail };
+}
+
+// ── 전체 삭제 ───────────────────────────────────────────────
+window.deleteAll = async function() {
+  if (!confirm('⚠️ reviews 컬렉션 아래 지수·로사·혜현의 모든 posts를 삭제합니다.\n계속하시겠습니까?')) return;
+  const btn = document.getElementById('btnDelete');
+  btn.disabled = true; btn.textContent = '⏳ 삭제 중...';
+  log('=== 전체 삭제 시작 ===', 'err');
+  const names = ['지수', '로사', '혜현'];
+  let total = 0;
+  try {
+    for (const name of names) {
+      const colRef = collection(db, 'reviews', name, 'posts');
+      const snap = await getDocs(colRef);
+      log(`${name}: ${snap.size}건 삭제 중...`, 'warn');
+      for (const d of snap.docs) {
+        await deleteDoc(doc(db, 'reviews', name, 'posts', d.id));
+        total++;
+      }
+      log(`${name} 완료`, 'ok');
+    }
+    log(`=== 삭제 완료: 총 ${total}건 삭제됨 ===`, 'ok');
+  } catch(e) {
+    log(`삭제 오류: ${e.message}`, 'err');
+    console.error(e);
+  }
+  btn.disabled = false; btn.textContent = '🗑️ 잘못된 데이터 전체 삭제';
+};
+
+window.startUpload = async function() {
+  const btn = document.getElementById("btnUpload");
+  btn.disabled = true; btn.textContent = "⏳ 업로드 중...";
+  log("=== 업로드 시작 ===\n", "info");
+  const sheets = [
+    { name: "지수", gid: "2102444171" },
+    { name: "로사", gid: "1099748468" },
+    { name: "혜현", gid: "631416476" }
+  ];
+  let totalOk = 0, totalFail = 0;
+  try {
+    for (const s of sheets) {
+      const { ok, fail } = await uploadReviewer(s.name, s.gid);
+      totalOk += ok; totalFail += fail;
+    }
+    log(`\n=== 전체 완료: 성공 ${totalOk}건, 실패 ${totalFail}건 ===`, totalFail ? "warn" : "ok");
+  } catch(e) {
+    log(`\n💥 치명적 오류: ${e.message}`, "err");
+    console.error(e);
+  }
+  btn.disabled = false; btn.textContent = "🚀 전체 업로드";
+};
+</script>
+</body>
+</html>

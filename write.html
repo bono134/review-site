@@ -41,6 +41,9 @@
                         <label for="author_input">저자</label>
                         <input type="text" id="author_input" class="form_input" placeholder="저자 입력">
 
+                        <label for="check_input">내용 점검</label>
+                        <textarea id="check_input" class="form_input textarea_medium" placeholder="내용 점검 사항을 자유롭게 입력해주세요"></textarea>
+
                         <label for="thoughts_input">읽은 소감</label>
                         <textarea id="thoughts_input" class="form_input textarea_large" placeholder="소감을 자유롭게 남겨주세요"></textarea>
 
@@ -102,17 +105,18 @@
                     document.getElementById('meeting_date_input').value   = data.date ? data.date.replace(/\./g, '-') : '';
                     document.getElementById('book_title_input').value     = data.title || '';
                     document.getElementById('author_input').value         = data.author && data.author !== '-' ? data.author : '';
+                    document.getElementById('check_input').value         = data.check || '';
                     document.getElementById('thoughts_input').value       = data.thoughts || '';
                     document.getElementById('other_input').value          = data.other || '';
                     document.getElementById('one_line_input').value       = data.oneLine || '';
-                    document.getElementById('rating_input').value         = data.rating ? data.rating.replace('★ ', '').trim() : '';
+                    document.getElementById('rating_input').value         = data.rating != null ? String(data.rating).replace('★ ', '').trim() : '';
                 } else {
                     alert('해당 리뷰를 찾을 수 없습니다.');
                     window.location.href = 'reviews.html';
                 }
             } catch (err) {
                 console.error('데이터 불러오기 실패:', err);
-                alert('데이터를 불러오는데 실패했습니다.');
+                alert('데이터를 불러오는데 실패했습니다.\n(F12 콘솔에서 오류 확인)');
             }
         }
 
@@ -126,6 +130,7 @@
             const reviewer    = document.getElementById('reviewer_select').value;
             const meetingDate = document.getElementById('meeting_date_input').value;
             const bookTitle   = document.getElementById('book_title_input').value;
+            const check       = document.getElementById('check_input').value || '';
             const thoughts    = document.getElementById('thoughts_input').value;
             const author      = document.getElementById('author_input').value || '-';
             const other       = document.getElementById('other_input').value || '';
@@ -147,6 +152,7 @@
                 author, 
                 reviewer,
                 rating: displayRating, 
+                check,
                 thoughts, 
                 oneLine, 
                 other 
@@ -175,6 +181,23 @@
         // ── 스크롤 헤더 이벤트
         const wrap = document.querySelector('.wrap');
         window.addEventListener('scroll', () => wrap.classList.toggle('scrolled', window.scrollY > 10));
+
+        // ── 날짜 input 박스 클릭 시 달력 오픈
+        const dateInput = document.getElementById('meeting_date_input');
+        if (dateInput) {
+            dateInput.addEventListener('click', () => {
+                try { dateInput.showPicker(); } catch(e) { dateInput.focus(); }
+            });
+        }
+
+        // ── 텍스트에어리어 자동 높이 조절
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        }
+        document.querySelectorAll('textarea').forEach(ta => {
+            ta.addEventListener('input', () => autoResize(ta));
+        });
 
         // ── 실행
         loadExistingData();

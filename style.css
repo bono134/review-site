@@ -592,12 +592,20 @@ body.theme_light {
 
 .textarea_large {
     min-height: 250px;
-    resize: vertical;
+    resize: none;
+    overflow: hidden;
+}
+
+.textarea_medium {
+    min-height: 125px;
+    resize: none;
+    overflow: hidden;
 }
 
 .textarea_small {
     min-height: 80px;
-    resize: vertical;
+    resize: none;
+    overflow: hidden;
 }
 
 .form_actions {
@@ -677,7 +685,39 @@ body.theme_light {
 .detail_actions {
     display: flex;
     gap: 0.8rem;
+    flex-shrink: 0;
 }
+
+/* 버튼 공통 */
+.submit_btn, .cancel_btn, .delete_btn {
+    padding: 0.55rem 1.2rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    transition: background-color 0.2s, opacity 0.2s;
+    white-space: nowrap;
+}
+.submit_btn {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+.submit_btn:hover { opacity: 0.85; }
+
+.cancel_btn {
+    background-color: transparent;
+    color: var(--grey-text);
+    border: 1px solid rgba(130, 120, 107, 0.35);
+}
+.cancel_btn:hover { background-color: rgba(130, 120, 107, 0.1); }
+
+.delete_btn {
+    background-color: #dc3545;
+    color: #fff;
+}
+.delete_btn:hover { opacity: 0.85; }
 
 .detail_info_grid {
     display: grid;
@@ -762,7 +802,7 @@ body.theme_light {
 /* ---------- Write Page (write.html) ---------- */
 .form_page_container {
     padding: 10rem 5% 6rem;
-    max-width: 800px;
+    max-width: 1100px;
     margin: 0 auto;
     width: 100%;
 }
@@ -786,7 +826,7 @@ body.theme_light {
 /* ---------- Detail Page (detail.html) ---------- */
 .detail_page_container {
     padding: 10rem 5% 6rem;
-    max-width: 800px;
+    max-width: 1100px;
     margin: 0 auto;
     width: 100%;
 }

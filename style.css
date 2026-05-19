@@ -667,25 +667,16 @@ body.theme_light {
     backdrop-filter: blur(4px);
 }
 
-.detail_header {
+.detail_wrapper {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 2px solid rgba(217, 156, 54, 0.3);
-    padding-bottom: 0.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.detail_title {
-    font-size: 2rem;
-    color: var(--primary-color);
-    line-height: 1.2;
+    flex-direction: column;
 }
 
 .detail_actions {
     display: flex;
+    justify-content: flex-end;
     gap: 0.8rem;
-    flex-shrink: 0;
+    margin-top: 1rem;
 }
 
 /* 버튼 공통 */
@@ -719,14 +710,24 @@ body.theme_light {
 }
 .delete_btn:hover { opacity: 0.85; }
 
-.detail_info_grid {
+.detail_meta_top {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
     background-color: rgba(217, 156, 54, 0.05);
-    padding: 1.5rem;
-    border-radius: 8px;
+    padding: 1.2rem 1.5rem;
+    border-radius: 8px 8px 0 0;
+}
+
+.detail_meta_main {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    background-color: rgba(217, 156, 54, 0.08);
+    padding: 1.2rem 1.5rem;
+    border-radius: 0 0 8px 8px;
     margin-bottom: 1.5rem;
+    border-top: 1px solid rgba(217, 156, 54, 0.2);
 }
 
 .info_item {
@@ -908,10 +909,11 @@ body.theme_light {
         padding: 1.5rem;
     }
 
-    .detail_info_grid {
+    .detail_meta_top {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .detail_title { font-size: 1.5rem; }
-    .detail_header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .detail_meta_main {
+        grid-template-columns: 1fr 1fr;
+    }
 }

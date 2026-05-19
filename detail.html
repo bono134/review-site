@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>리뷰 상세 - 도란도란독서</title>
+    <title>리뷰 상세 | 도도독 독서 모임</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -21,52 +21,56 @@
 
         <div class="container detail_page_container">
             <main class="content">
-                <div class="detail_box">
-                    <div class="detail_header">
-                        <div class="detail_title" id="detail_book_title">-</div>
-                        <div class="detail_actions">
-                            <button class="submit_btn" id="detail_edit_btn">수정</button>
-                            <button class="delete_btn" id="detail_delete_btn">삭제</button>
-                            <button class="cancel_btn" id="detail_list_btn">목록으로</button>
+                <div class="detail_wrapper">
+                    <div class="detail_box">
+                        <div class="detail_meta_top">
+                            <div class="info_item">
+                                <span class="info_label">모임 날짜</span>
+                                <span class="info_value" id="detail_date">-</span>
+                            </div>
+                            <div class="info_item">
+                                <span class="info_label">작성자</span>
+                                <span class="info_value" id="detail_reviewer">-</span>
+                            </div>
+                        </div>
+                        <div class="detail_meta_main">
+                            <div class="info_item">
+                                <span class="info_label">도서명</span>
+                                <span class="info_value" id="detail_book_title">-</span>
+                            </div>
+                            <div class="info_item">
+                                <span class="info_label">저자</span>
+                                <span class="info_value" id="detail_author">-</span>
+                            </div>
+                            <div class="info_item">
+                                <span class="info_label">별점</span>
+                                <span class="info_value rating" id="detail_rating">-</span>
+                            </div>
+                        </div>
+
+                        <div class="detail_content_area">
+                            <div class="detail_section" id="detail_oneline_section" style="display:none;">
+                                <div class="detail_section_title">한줄평</div>
+                                <div class="detail_text oneline" id="detail_oneline">-</div>
+                            </div>
+                            <div class="detail_section" id="detail_check_section" style="display:none;">
+                                <div class="detail_section_title">내용 점검</div>
+                                <div class="detail_text" id="detail_check">-</div>
+                            </div>
+                            <div class="detail_section">
+                                <div class="detail_section_title">읽은 소감</div>
+                                <div class="detail_text" id="detail_thoughts">-</div>
+                            </div>
+                            <div class="detail_section" id="detail_other_section" style="display:none;">
+                                <div class="detail_section_title">기타</div>
+                                <div class="detail_text" id="detail_other">-</div>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="detail_info_grid">
-                        <div class="info_item">
-                            <span class="info_label">작성자</span>
-                            <span class="info_value" id="detail_reviewer">-</span>
-                        </div>
-                        <div class="info_item">
-                            <span class="info_label">저자</span>
-                            <span class="info_value" id="detail_author">-</span>
-                        </div>
-                        <div class="info_item">
-                            <span class="info_label">모임 날짜</span>
-                            <span class="info_value" id="detail_date">-</span>
-                        </div>
-                        <div class="info_item">
-                            <span class="info_label">별점</span>
-                            <span class="info_value rating" id="detail_rating">-</span>
-                        </div>
-                    </div>
-
-                    <div class="detail_content_area">
-                        <div class="detail_section" id="detail_oneline_section" style="display:none;">
-                            <div class="detail_section_title">한줄평</div>
-                            <div class="detail_text oneline" id="detail_oneline">-</div>
-                        </div>
-                        <div class="detail_section" id="detail_check_section" style="display:none;">
-                            <div class="detail_section_title">내용 점검</div>
-                            <div class="detail_text" id="detail_check">-</div>
-                        </div>
-                        <div class="detail_section">
-                            <div class="detail_section_title">읽은 소감</div>
-                            <div class="detail_text" id="detail_thoughts">-</div>
-                        </div>
-                        <div class="detail_section" id="detail_other_section" style="display:none;">
-                            <div class="detail_section_title">기타</div>
-                            <div class="detail_text" id="detail_other">-</div>
-                        </div>
+                    <div class="detail_actions">
+                        <button class="submit_btn" id="detail_edit_btn">수정</button>
+                        <button class="delete_btn" id="detail_delete_btn">삭제</button>
+                        <button class="cancel_btn" id="detail_list_btn">목록으로</button>
                     </div>
                 </div>
             </main>

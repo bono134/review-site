@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book - 홈페이지</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="theme_dark">
+    <div class="wrap">
+        <header class="header" id="main_header">
+            <a href="index.html" class="logo"><span class="highlight">도</span>란<span class="highlight">도</span>란<span class="highlight">독</span>서</a>
+            <nav class="gnb" id="main_gnb">
+                <a href="reviews.html">리뷰</a>
+                <a href="#">예비도서</a>
+                <a href="#">어워드</a>
+            </nav>
+        </header>
+
+        <div class="container">
+            <main class="content home_main">
+                <div class="hero_top_text">
+                    2022 <span class="dash">&mdash;</span> ing &nbsp;&middot;&nbsp; 독서 기록
+                </div>
+
+                <h1 class="hero_title">
+                    책<span class="comma">,</span><br>
+                    읽는 우리
+                </h1>
+
+                <p class="hero_subtitle">
+                    로사 &middot; 혜현 &middot; 지수의 독서 모임
+                </p>
+
+                <div class="stats_container">
+                    <div class="stat_item">
+                        <div class="stat_number" id="total_books">60</div>
+                        <div class="stat_label">읽은 책</div>
+                    </div>
+                    <div class="stat_item">
+                        <div class="stat_number" id="active_years">4</div>
+                        <div class="stat_label">년째</div>
+                    </div>
+                    <div class="stat_item">
+                        <div class="stat_number" id="average_rating">3.4</div>
+                        <div class="stat_label">평균 별점</div>
+                    </div>
+                </div>
+            </main>
+            <aside class="areabox"></aside>
+        </div>
+
+        <footer class="footer">
+            &copy; 2026 도란도란독서. All rights reserved.
+        </footer>
+    </div>
+
+    <script>
+        // 스크롤 헤더 고정
+        const wrap = document.querySelector('.wrap');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 10) {
+                wrap.classList.add('scrolled');
+            } else {
+                wrap.classList.remove('scrolled');
+            }
+        });
+
+        // 모임 유지 년도 계산 (2022년부터 시작)
+        const startYear = 2022;
+        const currentYear = new Date().getFullYear();
+        const yearsActive = currentYear - startYear + 1;
+        document.getElementById('active_years').innerText = yearsActive;
+    </script>
+</body>
+
+</html>

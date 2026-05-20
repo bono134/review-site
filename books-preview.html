@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예비도서 | 도란도란독서</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .preview_page {
+            padding: 10rem 5% 6rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 입력 폼 영역 */
+        .preview_form_box {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 2rem 2.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2.5rem;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .preview_form_box.editing {
+            border-color: var(--primary-color);
+        }
+
+        .preview_form_heading {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+            padding-left: 0.7rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .preview_form_fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.4fr;
+            gap: 0.8rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .preview_form_field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .preview_form_label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--grey-text);
+        }
+
+        .preview_form_actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.7rem;
+        }
+
+        /* 리스트 컬럼 */
+        .col_pv_num {
+            width: 6%;
+        }
+
+        .col_pv_title {
+            width: 38%;
+            text-align: left;
+        }
+
+        .col_pv_author {
+            width: 18%;
+        }
+
+        .col_pv_url {
+            width: 18%;
+        }
+
+        .col_pv_url a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .col_pv_url a:hover {
+            text-decoration: underline;
+        }
+
+        .col_pv_actions {
+            width: 20%;
+            white-space: nowrap;
+        }
+
+        /* 편집 / 삭제 버튼 (행 내) */
+        .row_btn {
+            padding: 0.28rem 0.72rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .row_edit_btn {
+            background: rgba(217, 156, 54, 0.1);
+            color: var(--primary-color);
+            border-color: rgba(217, 156, 54, 0.3);
+            margin-right: 0.3rem;
+        }
+
+        .row_edit_btn:hover {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .row_del_btn {
+            background: rgba(220, 53, 69, 0.08);
+            color: #dc3545;
+            border-color: rgba(220, 53, 69, 0.2);
+        }
+
+        .row_del_btn:hover {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .preview_page {
+                padding: 8rem 3% 4rem;
+            }
+
+            .preview_form_box {
+                padding: 1.5rem;
+            }
+
+            .preview_form_fields {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .preview_form_fields .url_field {
+                grid-column: 1 / -1;
+            }
+
+            .col_pv_num {
+                display: none;
+            }
+
+            .col_pv_url {
+                display: none;
+            }
+
+            .col_pv_actions {
+                width: 25%;
+            }
+        }
+    </style>
+</head>
+
+<body class="theme_light">
+    <div class="wrap">
+        <header class="header">
+            <a href="index.html" class="logo"><span class="highlight">도</span>란<span class="highlight">도</span>란<span class="highlight">독</span>서</a>
+            <nav class="gnb">
+                <a href="reviews.html">리뷰</a>
+                <a href="books-preview.html" class="active">예비도서</a>
+                <a href="#">어워드</a>
+            </nav>
+        </header>
+
+        <div class="container">
+            <main class="content preview_page">
+                <div class="board_header">
+                    <h1 class="board_title">예비 도서</h1>
+                </div>
+
+                <!-- 입력 폼 -->
+                <div class="preview_form_box" id="preview_form_box">
+                    <div class="preview_form_heading" id="form_heading">도서 등록</div>
+                    <div class="preview_form_fields">
+                        <div class="preview_form_field">
+                            <label class="preview_form_label" for="input_title">도서명 <span style="color:#dc3545">*</span></label>
+                            <input type="text" id="input_title" class="form_input" placeholder="도서명을 입력하세요">
+                        </div>
+                        <div class="preview_form_field">
+                            <label class="preview_form_label" for="input_author">저자명 <span style="color:#dc3545">*</span></label>
+                            <input type="text" id="input_author" class="form_input" placeholder="저자명을 입력하세요">
+                        </div>
+                        <div class="preview_form_field url_field">
+                            <label class="preview_form_label" for="input_url">URL <span style="color:var(--grey-text);font-weight:400">(선택)</span></label>
+                            <input type="url" id="input_url" class="form_input" placeholder="https://...">
+                        </div>
+                    </div>
+                    <div class="preview_form_actions">
+                        <button class="cancel_btn" id="form_cancel_btn">취소</button>
+                        <button class="submit_btn" id="form_submit_btn">등록</button>
+                    </div>
+                </div>
+
+                <!-- 도서 리스트 -->
+                <div class="table_container">
+                    <table class="review_table">
+                        <thead>
+                            <tr>
+                                <th class="col_pv_num">No.</th>
+                                <th class="col_pv_title">도서명</th>
+                                <th class="col_pv_author">저자명</th>
+                                <th class="col_pv_url">URL</th>
+                                <th class="col_pv_actions">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="preview_tbody"></tbody>
+                    </table>
+                </div>
+
+                <div class="load_more_wrap" id="load_more_wrap" style="display:none;">
+                    <button class="load_more_btn" id="load_more_btn">더보기</button>
+                </div>
+            </main>
+            <aside class="areabox"></aside>
+        </div>
+
+        <footer class="footer">
+            &copy; 2026 도란도란독서. All rights reserved.
+        </footer>
+    </div>
+
+    <script type="module">
+        import {
+            db, collection, addDoc, getDocs, updateDoc, deleteDoc,
+            doc, query, orderBy, limit, serverTimestamp
+        } from './firebase-config.js';
+
+        const COLLECTION = 'preview_books';
+        const PAGE_SIZE  = 30;
+
+        const booksCol = () => collection(db, COLLECTION);
+        const bookDoc  = (id) => doc(db, COLLECTION, id);
+
+        // 샘플 데이터 (스프레드시트 기준)
+        const SEED_DATA = [
+            { title: '모방과 창조',                          author: '김세직' },
+            { title: '예언자의 노래',                        author: '폴린치' },
+            { title: '어떤 어른',                            author: '김소영' },
+            { title: '커밍 업 쇼트',                        author: '제니퍼 M. 실바' },
+            { title: '세월',                                 author: '아니에르노' },
+            { title: '세상의 주인',                          author: '로버트 휴 벤슨' },
+            { title: '월든',                                 author: '헨리 데이비드 소로' },
+            { title: '다다를 수 없는 나라',                  author: '크리스토프 바타유' },
+            { title: '워더링 하이츠',                        author: '에밀리 브론테' },
+            { title: '여름',                                 author: '이디스 워튼' },
+            { title: '내 휴식과 이완의 해',                  author: '오테사 모시테그' },
+            { title: '말라바르 언덕의 과부들',               author: '수자타 매시' },
+            { title: '닿을 수 있는 세상',                    author: '마일리스 드 케랑갈' },
+            { title: '인도로 가는 길',                       author: 'E. M. 포스터' },
+            { title: '모리스',                               author: 'E. M. 포스터' },
+            { title: '제5 도살장',                           author: '커트 보니컷' },
+            { title: '장미의 이름',                          author: '움베르토 에코' },
+            { title: '눈치',                                 author: '유니 홍' },
+            { title: '밥은 먹고 다니냐는 말',                author: '정은정' },
+            { title: '사나운 애착',                          author: '비비언 고닉' },
+            { title: '우주에서 기다릴게',                    author: '이소연' },
+            { title: '리아의 나라',                          author: '앤 패디먼' },
+            { title: '사랑의 기술',                          author: '에리히 프롬' },
+            { title: '인공지능 시대 인생의 의미',            author: '리하르트 다비트 프레히트' },
+            { title: '미래가 있던 자리',                     author: '아네테 케넬' },
+            { title: '나의 사랑스러운 방해자',               author: '줄리 필립스' },
+            { title: '그랜드스탠딩',                         author: '저스틴 토시' },
+            { title: '인간의 조건',                          author: '한나 아렌트' },
+            { title: '한나 아렌트의 말',                     author: '한나 아렌트' },
+            { title: '한나 아렌트의 정치강의',               author: '이진우' },
+            { title: '호텔 바비즌',                          author: '폴리나 브렌' },
+            { title: '암컷들',                               author: '루시 쿡' },
+            { title: '보통 일베들의 시대',                   author: '김학준' },
+            { title: '왜 어떤 정치인은 다른 정치인보다 위험한가', author: '제임스 길리언' },
+            { title: '보이지 않는 여자들',                   author: '캐럴라인 크리아도 페레스' },
+            { title: '20 VS 80의 사회',                      author: '리처드 리브스' },
+            { title: '같이가면 길이 된다',                   author: '이상헌' },
+            { title: '사회학으로의 초대',                    author: '피터 버거' },
+            { title: 'EBS 다큐프라임 자본주의',              author: 'EBS 다큐프라임 자본주의 제작팀' },
+        ];
+
+        // 상태
+        let allBooks     = [];
+        let visibleCount = PAGE_SIZE;
+        let editId       = null;
+
+        // Firestore
+        async function fetchBooks() {
+            const q    = query(booksCol(), orderBy('createdAt', 'asc'));
+            const snap = await getDocs(q);
+            return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        }
+
+        async function seedIfEmpty() {
+            const snap = await getDocs(query(booksCol(), limit(1)));
+            if (!snap.empty) return;
+            for (const item of SEED_DATA) {
+                await addDoc(booksCol(), { title: item.title, author: item.author, url: '', createdAt: serverTimestamp() });
+            }
+        }
+
+        // 렌더링
+        const tbody = document.getElementById('preview_tbody');
+
+        function escHtml(str) {
+            return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function renderTable() {
+            const toShow = allBooks.slice(0, visibleCount);
+            tbody.innerHTML = '';
+            toShow.forEach((b, idx) => {
+                const urlCell = b.url
+                    ? `<a href="${escHtml(b.url)}" target="_blank" rel="noopener noreferrer">링크</a>`
+                    : '-';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="col_pv_num">${idx + 1}</td>
+                    <td class="col_pv_title">${escHtml(b.title)}</td>
+                    <td class="col_pv_author">${escHtml(b.author)}</td>
+                    <td class="col_pv_url">${urlCell}</td>
+                    <td class="col_pv_actions">
+                        <button class="row_btn row_edit_btn" data-id="${b.id}">편집</button>
+                        <button class="row_btn row_del_btn"  data-id="${b.id}">삭제</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('load_more_wrap').style.display =
+                allBooks.length > visibleCount ? '' : 'none';
+        }
+
+        async function loadAndRender() {
+            allBooks = await fetchBooks();
+            renderTable();
+        }
+
+        // 폼 초기화
+        function resetForm() {
+            document.getElementById('input_title').value  = '';
+            document.getElementById('input_author').value = '';
+            document.getElementById('input_url').value    = '';
+            document.getElementById('form_submit_btn').textContent = '등록';
+            document.getElementById('form_heading').textContent    = '도서 등록';
+            document.getElementById('preview_form_box').classList.remove('editing');
+            editId = null;
+        }
+
+        // 등록 / 수정
+        document.getElementById('form_submit_btn').addEventListener('click', async () => {
+            const title  = document.getElementById('input_title').value.trim();
+            const author = document.getElementById('input_author').value.trim();
+            const url    = document.getElementById('input_url').value.trim();
+
+            if (!title)  { alert('도서명을 입력해주세요.');  return; }
+            if (!author) { alert('저자명을 입력해주세요.'); return; }
+
+            try {
+                if (editId) {
+                    await updateDoc(bookDoc(editId), { title, author, url, updatedAt: serverTimestamp() });
+                } else {
+                    await addDoc(booksCol(), { title, author, url, createdAt: serverTimestamp() });
+                }
+                resetForm();
+                visibleCount = PAGE_SIZE;
+                await loadAndRender();
+            } catch (err) {
+                console.error(err);
+                alert('저장에 실패했습니다.');
+            }
+        });
+
+        // 취소
+        document.getElementById('form_cancel_btn').addEventListener('click', () => {
+            resetForm();
+        });
+
+        // 편집 / 삭제 (이벤트 위임)
+        tbody.addEventListener('click', async e => {
+            const editBtn = e.target.closest('.row_edit_btn');
+            const delBtn  = e.target.closest('.row_del_btn');
+
+            if (editBtn) {
+                const book = allBooks.find(b => b.id === editBtn.dataset.id);
+                if (!book) return;
+                document.getElementById('input_title').value  = book.title;
+                document.getElementById('input_author').value = book.author;
+                document.getElementById('input_url').value    = book.url || '';
+                document.getElementById('form_submit_btn').textContent = '수정';
+                document.getElementById('form_heading').textContent    = '도서 편집';
+                document.getElementById('preview_form_box').classList.add('editing');
+                editId = book.id;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            if (delBtn) {
+                if (!confirm('이 도서를 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.')) return;
+                try {
+                    await deleteDoc(bookDoc(delBtn.dataset.id));
+                    if (editId === delBtn.dataset.id) resetForm();
+                    await loadAndRender();
+                } catch (err) {
+                    console.error(err);
+                    alert('삭제에 실패했습니다.');
+                }
+            }
+        });
+
+        // 더보기
+        document.getElementById('load_more_btn').addEventListener('click', () => {
+            visibleCount += PAGE_SIZE;
+            renderTable();
+        });
+
+        // 스크롤 헤더
+        const wrap = document.querySelector('.wrap');
+        window.addEventListener('scroll', () => wrap.classList.toggle('scrolled', window.scrollY > 10));
+
+        // 초기 실행
+        await seedIfEmpty();
+        await loadAndRender();
+    </script>
+</body>
+
+</html>

@@ -186,7 +186,7 @@
                     </td>
                     <td class="col_author">${r.author}</td>
                     <td class="col_reviewer">${r.reviewer}</td>
-                    <td class="col_rating">${r.rating}</td>
+                    <td class="col_rating">${String(r.rating || '-').replace(/★\s*/g, '')}</td>
                 `;
                 tbody.appendChild(tr);
             });

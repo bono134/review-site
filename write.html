@@ -24,7 +24,7 @@
                 <div class="form_box">
                     <h2 class="form_page_title" id="page_title">리뷰 등록</h2>
                     <form class="review_form" id="review_form">
-                        <label for="reviewer_select">작성자</label>
+                        <label for="reviewer_select"><span class="required_mark">*</span> 작성자</label>
                         <select id="reviewer_select" class="form_input">
                             <option value="">선택</option>
                             <option value="로사">로사</option>
@@ -32,10 +32,10 @@
                             <option value="지수">지수</option>
                         </select>
 
-                        <label for="meeting_date_input">모임 날짜</label>
+                        <label for="meeting_date_input"><span class="required_mark">*</span> 모임 날짜</label>
                         <input type="date" id="meeting_date_input" class="form_input">
 
-                        <label for="book_title_input">도서명</label>
+                        <label for="book_title_input"><span class="required_mark">*</span> 도서명</label>
                         <input type="text" id="book_title_input" class="form_input" placeholder="도서명 입력">
 
                         <label for="author_input">저자</label>
@@ -44,7 +44,7 @@
                         <label for="check_input">내용 점검</label>
                         <textarea id="check_input" class="form_input textarea_medium" placeholder="내용 점검 사항을 자유롭게 입력해주세요"></textarea>
 
-                        <label for="thoughts_input">읽은 소감</label>
+                        <label for="thoughts_input"><span class="required_mark">*</span> 읽은 소감</label>
                         <textarea id="thoughts_input" class="form_input textarea_large" placeholder="소감을 자유롭게 남겨주세요"></textarea>
 
                         <label for="other_input">기타</label>
@@ -146,10 +146,10 @@
             const ratingRaw   = document.getElementById('rating_input').value || '-';
             const oneLine     = document.getElementById('one_line_input').value || '';
 
-            if (!reviewer || !meetingDate || !bookTitle.trim() || !thoughts.trim()) {
-                alert('데이터를 입력해주세요');
-                return;
-            }
+            if (!reviewer)          { alert('작성자를 선택해주세요.');       return; }
+            if (!meetingDate)       { alert('모임 날짜를 입력해주세요.');     return; }
+            if (!bookTitle.trim())  { alert('도서명을 입력해주세요.');         return; }
+            if (!thoughts.trim())   { alert('읽은 소감을 입력해주세요.');      return; }
 
             const formattedDate = meetingDate.replace(/-/g, '.');
             const displayRating = ratingRaw !== '-' && !ratingRaw.includes('★')

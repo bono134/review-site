@@ -57,22 +57,56 @@
         </footer>
     </div>
 
-    <script>
+    <script type="module">
+        import { db, collectionGroup, getDocs, query } from './firebase-config.js';
+
         // 스크롤 헤더 고정
         const wrap = document.querySelector('.wrap');
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 10) {
-                wrap.classList.add('scrolled');
-            } else {
-                wrap.classList.remove('scrolled');
-            }
+            wrap.classList.toggle('scrolled', window.scrollY > 10);
         });
+
+        // 카운트업 애니메이션
+        function countUp(el, target, decimals = 0, duration = 1400) {
+            const start = performance.now();
+            function tick(now) {
+                const t = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+                el.innerText = (target * eased).toFixed(decimals);
+                if (t < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        }
 
         // 모임 유지 년도 계산 (2022년부터 시작)
         const startYear = 2022;
-        const currentYear = new Date().getFullYear();
-        const yearsActive = currentYear - startYear + 1;
-        document.getElementById('active_years').innerText = yearsActive;
+        const yearsActive = new Date().getFullYear() - startYear + 1;
+        countUp(document.getElementById('active_years'), yearsActive, 0, 1000);
+
+        // Firebase에서 리뷰 데이터 로드 → 읽은 책 수 + 평균 별점 계산
+        try {
+            const snap = await getDocs(query(collectionGroup(db, 'posts')));
+            const reviews = snap.docs.map(d => d.data());
+
+            // 읽은 책 수: (날짜 + 제목) 기준 고유 도서 수
+            const uniqueBooks = new Set(reviews.map(r => `${r.date}|${r.title}`));
+            countUp(document.getElementById('total_books'), uniqueBooks.size, 0, 1200);
+
+            // 평균 별점: "★ 4.1" 또는 숫자 4.1 모두 처리
+            const ratings = reviews
+                .map(r => {
+                    const v = r.rating;
+                    if (typeof v === 'number') return v;
+                    return parseFloat(String(v || '').replace(/[^0-9.]/g, ''));
+                })
+                .filter(n => !isNaN(n) && n > 0);
+            if (ratings.length > 0) {
+                const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+                countUp(document.getElementById('average_rating'), avg, 1, 1400);
+            }
+        } catch (err) {
+            console.error('통계 데이터 로드 실패:', err);
+        }
     </script>
 </body>
 

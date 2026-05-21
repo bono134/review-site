@@ -141,6 +141,30 @@ body.theme_light {
     margin-top: auto;
 }
 
+/* ---------- 관리자 모드 ---------- */
+.admin_only { display: none !important; }
+body.is_admin .admin_only { display: revert !important; }
+body.is_admin .admin_flex { display: flex !important; }
+
+.admin_trigger_btn {
+    cursor: pointer;
+    opacity: 0.25;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+    transition: opacity 0.2s;
+    user-select: none;
+}
+.admin_trigger_btn:hover { opacity: 1; }
+
+.admin_indicator {
+    display: none;
+    color: var(--primary-color);
+    font-size: 0.8rem;
+    margin-left: 0.6rem;
+    font-weight: 600;
+}
+body.is_admin .admin_indicator { display: inline; }
+
 /* ---------- Main Page (index.html) ---------- */
 .home_main {
     padding: 10rem 5% 6rem;

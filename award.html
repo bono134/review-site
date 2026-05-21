@@ -270,12 +270,12 @@
             <main class="content award_page">
                 <div class="board_header">
                     <h1 class="board_title">어워드</h1>
-                    <button class="register_btn" id="open_register_btn">질문 등록</button>
+                    <button class="register_btn admin_only" id="open_register_btn">질문 등록</button>
                 </div>
 
                 <!-- 연도 탭 -->
                 <div class="year_tab_bar" id="year_tab_bar">
-                    <button class="add_year_btn" id="add_year_btn">+ 연도 추가</button>
+                    <button class="add_year_btn admin_only" id="add_year_btn">+ 연도 추가</button>
                 </div>
 
                 <!-- 질문 카드 그리드 -->
@@ -291,6 +291,8 @@
 
         <footer class="footer">
             &copy; 2026 도란도란독서. All rights reserved.
+            <span class="admin_indicator">· 관리자 모드</span>
+            <span class="admin_trigger_btn" id="admin_trigger">🔒</span>
         </footer>
     </div>
 
@@ -324,6 +326,7 @@
     </dialog>
 
     <script type="module">
+        import { setupAdminTrigger, isAdmin } from './admin.js';
         import {
             db, collection, addDoc, getDocs, updateDoc, deleteDoc,
             doc, setDoc, query, orderBy, limit, serverTimestamp
@@ -467,7 +470,7 @@
             const deleteWrap = document.getElementById('year_delete_wrap');
             const filtered  = questions.filter(q => q.year === activeYear);
             grid.innerHTML  = '';
-            deleteWrap.style.display = activeYear ? '' : 'none';
+            deleteWrap.style.display = (activeYear && isAdmin()) ? 'flex' : 'none';
 
             if (!activeYear) {
                 grid.innerHTML = '<div class="no_data_msg">연도를 먼저 추가해 주세요.</div>';
@@ -493,7 +496,7 @@
                 card.innerHTML = `
                     <div class="question_card_header">
                         <div class="question_text">${escHtml(q.question)}</div>
-                        <div class="card_btn_group">
+                        <div class="card_btn_group admin_only admin_flex">
                             <button class="row_btn row_edit_btn" data-id="${q.id}">편집</button>
                             <button class="row_btn row_del_btn"  data-id="${q.id}">삭제</button>
                         </div>
@@ -625,6 +628,7 @@
         window.addEventListener('scroll', () => wrap.classList.toggle('scrolled', window.scrollY > 10));
 
         // ── 초기 실행 ───────────────────────────────────────────
+        setupAdminTrigger();
         await seedIfEmpty();
         [years, questions] = await Promise.all([fetchYears(), fetchQuestions()]);
         if (years.length > 0) activeYear = Number(years[0]);

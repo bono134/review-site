@@ -182,7 +182,7 @@
                 </div>
 
                 <!-- 입력 폼 -->
-                <div class="preview_form_box" id="preview_form_box">
+                <div class="preview_form_box admin_only" id="preview_form_box">
                     <div class="preview_form_heading" id="form_heading">도서 등록</div>
                     <div class="preview_form_fields">
                         <div class="preview_form_field">
@@ -213,7 +213,7 @@
                                 <th class="col_pv_title">도서명</th>
                                 <th class="col_pv_author">저자명</th>
                                 <th class="col_pv_url">URL</th>
-                                <th class="col_pv_actions">관리</th>
+                                <th class="col_pv_actions admin_only">관리</th>
                             </tr>
                         </thead>
                         <tbody id="preview_tbody"></tbody>
@@ -229,10 +229,13 @@
 
         <footer class="footer">
             &copy; 2026 도란도란독서. All rights reserved.
+            <span class="admin_indicator">· 관리자 모드</span>
+            <span class="admin_trigger_btn" id="admin_trigger">🔒</span>
         </footer>
     </div>
 
     <script type="module">
+        import { setupAdminTrigger } from './admin.js';
         import {
             db, collection, addDoc, getDocs, updateDoc, deleteDoc,
             doc, query, orderBy, limit, serverTimestamp
@@ -327,7 +330,7 @@
                     <td class="col_pv_title">${escHtml(b.title)}</td>
                     <td class="col_pv_author">${escHtml(b.author)}</td>
                     <td class="col_pv_url">${urlCell}</td>
-                    <td class="col_pv_actions">
+                    <td class="col_pv_actions admin_only">
                         <button class="row_btn row_edit_btn" data-id="${b.id}">편집</button>
                         <button class="row_btn row_del_btn"  data-id="${b.id}">삭제</button>
                     </td>
@@ -425,6 +428,7 @@
         window.addEventListener('scroll', () => wrap.classList.toggle('scrolled', window.scrollY > 10));
 
         // 초기 실행
+        setupAdminTrigger();
         await seedIfEmpty();
         await loadAndRender();
     </script>

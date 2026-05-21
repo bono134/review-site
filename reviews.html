@@ -23,7 +23,7 @@
             <main class="content board_page">
                 <div class="board_header">
                     <h1 class="board_title">리뷰 목록</h1>
-                    <button class="register_btn" id="open_register_btn">등록</button>
+                    <button class="register_btn admin_only" id="open_register_btn">등록</button>
                 </div>
 
                 <section class="latest_highlights" id="latest_highlights"></section>
@@ -65,6 +65,8 @@
 
         <footer class="footer">
             &copy; 2026 도란도란독서. All rights reserved.
+            <span class="admin_indicator">· 관리자 모드</span>
+            <span class="admin_trigger_btn" id="admin_trigger">🔒</span>
         </footer>
     </div>
 
@@ -76,6 +78,8 @@
             collection, collectionGroup, addDoc, getDocs, getDoc,
             updateDoc, doc, query, orderBy, limit, serverTimestamp
         } from './firebase-config.js';
+        import { setupAdminTrigger } from './admin.js';
+        setupAdminTrigger();
 
         // ── 전역 상태
         let allReviews          = [];

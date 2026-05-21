@@ -64,8 +64,8 @@
                     </div>
                 </div>
                 <div class="detail_actions">
-                    <button class="submit_btn" id="detail_edit_btn">수정</button>
-                    <button class="delete_btn" id="detail_delete_btn">삭제</button>
+                    <button class="submit_btn admin_only" id="detail_edit_btn">수정</button>
+                    <button class="delete_btn admin_only" id="detail_delete_btn">삭제</button>
                     <button class="cancel_btn" id="detail_list_btn">목록으로</button>
                 </div>
             </main>
@@ -73,6 +73,8 @@
 
         <footer class="footer">
             &copy; 2026 도란도란독서. All rights reserved.
+            <span class="admin_indicator">· 관리자 모드</span>
+            <span class="admin_trigger_btn" id="admin_trigger">🔒</span>
         </footer>
     </div>
 
@@ -80,6 +82,8 @@
         import {
             db, getDoc, doc, deleteDoc
         } from './firebase-config.js';
+        import { setupAdminTrigger } from './admin.js';
+        setupAdminTrigger();
 
         const postDoc = (reviewer, id) => doc(db, 'reviews', reviewer, 'posts', id);
 

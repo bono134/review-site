@@ -952,4 +952,31 @@ body.is_admin .admin_indicator { display: inline; }
 
     .detail_title { font-size: 1.5rem; }
     .detail_header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+
+    /* 헤더: 로고 위 / GNB 아래 2줄 배치 */
+    .header {
+        height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.9rem 5% 0.7rem;
+        gap: 0.5rem;
+    }
+
+    .logo { font-size: 1.3rem; }
+
+    .gnb {
+        gap: 1.4rem;
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .gnb > a { font-size: 0.95rem; }
+
+    /* 헤더가 2줄이 되면 컨텐츠 상단 여백도 늘려야 함 (~110px → 7rem) */
+    .board_page          { padding-top: 7.5rem; }
+    .form_page_container,
+    .detail_page_container { padding-top: 7.5rem; }
+    .preview_page        { padding-top: 7.5rem; }
+    .home_main           { padding-top: 7.5rem; }
+    .award_page          { padding-top: 7.5rem; }
 }

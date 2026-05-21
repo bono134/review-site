@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어워드 | 도란도란독서</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .award_page {
+            padding: 10rem 5% 6rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── 연도 탭 ── */
+        .year_tab_bar {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(217, 156, 54, 0.3);
+            padding-bottom: 1.2rem;
+        }
+
+        .year_tab {
+            background: none;
+            border: 1px solid rgba(217, 156, 54, 0.3);
+            color: var(--grey-text);
+            padding: 0.4rem 1.4rem;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .year_tab:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .year_tab.active {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border-color: var(--primary-color);
+        }
+
+        .add_year_btn {
+            background: none;
+            border: 1px dashed rgba(217, 156, 54, 0.5);
+            color: var(--primary-color);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .add_year_btn:hover {
+            background: rgba(217, 156, 54, 0.08);
+        }
+
+        /* ── 모달 ── */
+        .award_modal {
+            margin: auto;
+            border: none;
+            border-radius: 12px;
+            padding: 2.5rem;
+            max-width: 680px;
+            width: 92%;
+            background-color: var(--bg-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            color: var(--text-color);
+            font-family: 'Noto Serif KR', serif;
+        }
+
+        .award_modal::backdrop {
+            background-color: rgba(25, 22, 20, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .award_answers_grid {
+            display: grid;
+            grid-template-columns: 52px 1fr;
+            gap: 0.65rem 1rem;
+            align-items: start;
+            margin: 1.2rem 0;
+        }
+
+        .answer_label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-align: right;
+            padding-top: 0.85rem;
+        }
+
+        /* ── 질문 카드 그리드 ── */
+        .question_grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .question_card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 1.5rem 1.8rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            border-top: 3px solid var(--primary-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: box-shadow 0.3s, transform 0.3s;
+        }
+
+        .question_card:hover {
+            box-shadow: 0 8px 25px rgba(217, 156, 54, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .question_card_header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+
+        .question_text {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-color);
+            line-height: 1.45;
+            flex: 1;
+        }
+
+        .card_btn_group {
+            display: flex;
+            gap: 0.3rem;
+            flex-shrink: 0;
+        }
+
+        .row_btn {
+            padding: 0.28rem 0.72rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .row_edit_btn {
+            background: rgba(217, 156, 54, 0.1);
+            color: var(--primary-color);
+            border-color: rgba(217, 156, 54, 0.3);
+        }
+
+        .row_edit_btn:hover { background: var(--primary-color); color: #fff; }
+
+        .row_del_btn {
+            background: rgba(220, 53, 69, 0.08);
+            color: #dc3545;
+            border-color: rgba(220, 53, 69, 0.2);
+        }
+
+        .row_del_btn:hover { background: #dc3545; color: #fff; }
+
+        /* ── 답변 목록 ── */
+        .answer_list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            border-top: 1px solid rgba(217, 156, 54, 0.15);
+            padding-top: 1rem;
+        }
+
+        .answer_row {
+            display: grid;
+            grid-template-columns: 44px 1fr;
+            gap: 0.8rem;
+            align-items: baseline;
+        }
+
+        .answer_member {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-align: right;
+        }
+
+        .answer_content {
+            font-size: 0.95rem;
+            color: var(--text-color);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .answer_content.empty {
+            color: var(--grey-text);
+            font-style: italic;
+        }
+
+        .no_data_msg {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--grey-text);
+            padding: 5rem 0;
+            font-size: 1rem;
+            line-height: 2;
+        }
+
+        /* ── 연도 삭제 버튼 ── */
+        .year_delete_wrap {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(220, 53, 69, 0.15);
+        }
+
+        .year_delete_btn {
+            background: none;
+            border: 1px solid rgba(220, 53, 69, 0.35);
+            color: #dc3545;
+            padding: 0.5rem 1.4rem;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .year_delete_btn:hover {
+            background: #dc3545;
+            color: #fff;
+            border-color: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .award_page { padding: 8rem 3% 4rem; }
+            .award_modal { padding: 1.8rem; }
+            .award_answers_grid { grid-template-columns: 44px 1fr; }
+            .question_grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body class="theme_light">
+    <div class="wrap">
+        <header class="header">
+            <a href="index.html" class="logo"><span class="highlight">도</span>란<span class="highlight">도</span>란<span class="highlight">독</span>서</a>
+            <nav class="gnb">
+                <a href="reviews.html">리뷰</a>
+                <a href="books-preview.html">예비도서</a>
+                <a href="award.html" class="active">어워드</a>
+            </nav>
+        </header>
+
+        <div class="container">
+            <main class="content award_page">
+                <div class="board_header">
+                    <h1 class="board_title">어워드</h1>
+                    <button class="register_btn" id="open_register_btn">질문 등록</button>
+                </div>
+
+                <!-- 연도 탭 -->
+                <div class="year_tab_bar" id="year_tab_bar">
+                    <button class="add_year_btn" id="add_year_btn">+ 연도 추가</button>
+                </div>
+
+                <!-- 질문 카드 그리드 -->
+                <div class="question_grid" id="question_grid"></div>
+
+                <!-- 연도 삭제 -->
+                <div class="year_delete_wrap" id="year_delete_wrap" style="display:none;">
+                    <button class="year_delete_btn" id="year_delete_btn">이 연도 삭제</button>
+                </div>
+            </main>
+            <aside class="areabox"></aside>
+        </div>
+
+        <footer class="footer">
+            &copy; 2026 도란도란독서. All rights reserved.
+        </footer>
+    </div>
+
+    <!-- 질문 등록 / 편집 모달 -->
+    <dialog class="award_modal" id="award_modal">
+        <div class="modal_content">
+            <div class="modal_title" id="modal_title">질문 등록</div>
+
+            <textarea id="input_question" class="form_input textarea_small"
+                placeholder="질문을 입력하세요"></textarea>
+
+            <div class="award_answers_grid">
+                <span class="answer_label">로사</span>
+                <textarea id="input_ans_rosa" class="form_input textarea_small"
+                    placeholder="로사의 답변"></textarea>
+
+                <span class="answer_label">혜현</span>
+                <textarea id="input_ans_hyh" class="form_input textarea_small"
+                    placeholder="혜현의 답변"></textarea>
+
+                <span class="answer_label">지수</span>
+                <textarea id="input_ans_jisu" class="form_input textarea_small"
+                    placeholder="지수의 답변"></textarea>
+            </div>
+
+            <div class="form_actions">
+                <button class="cancel_btn" id="form_cancel_btn">취소</button>
+                <button class="submit_btn" id="form_submit_btn">등록</button>
+            </div>
+        </div>
+    </dialog>
+
+    <script type="module">
+        import {
+            db, collection, addDoc, getDocs, updateDoc, deleteDoc,
+            doc, setDoc, query, orderBy, limit, serverTimestamp
+        } from './firebase-config.js';
+
+        const MEMBERS   = ['로사', '혜현', '지수'];
+        const YEARS_COL = () => collection(db, 'award_years');
+        const QS_COL    = () => collection(db, 'award_questions');
+        const yearDoc   = (y)  => doc(db, 'award_years', String(y));
+        const qDoc      = (id) => doc(db, 'award_questions', id);
+
+        const modal = document.getElementById('award_modal');
+
+        let years      = [];
+        let questions  = [];
+        let activeYear = null;
+        let editId     = null;
+
+        // ── 시드 데이터 ─────────────────────────────────────────
+        const SEED_YEARS = [2025, 2023, 2022];
+
+        const SEED_QUESTIONS = [
+            // 2025
+            { year: 2025, question: '올해의 책',                     answers: { '로사': '사라진 것들',                           '혜현': '긴 호흡',                                        '지수': '궤도' } },
+            { year: 2025, question: '기대 이하의 책',                 answers: { '로사': '예루살렘 이전의 아이히만',               '혜현': '<예루살렘 이전의 아이히만>',                    '지수': '예루살렘 이전의 아이히만' } },
+            { year: 2025, question: '기대 이상의 책',                 answers: { '로사': '궤도',                                  '혜현': '<궤도>',                                         '지수': '궤도' } },
+            { year: 2025, question: '보람을 준 책',                   answers: { '로사': '여자에 관하여',                         '혜현': '<나르시시즘의 고통>',                           '지수': '자연에 이름 붙이기' } },
+            { year: 2025, question: '여운이 오래 남은 책',            answers: { '로사': '사라진 것들',                           '혜현': '없음',                                           '지수': '궤도' } },
+            { year: 2025, question: '표지가 마음에 드는 책',          answers: { '로사': '',                                      '혜현': '<너무 늦은 시간>(하드커버)',                     '지수': '페넬로피아드' } },
+            { year: 2025, question: '읽었다고 자랑할 만한 책',        answers: { '로사': '자유로부터의 도피',                     '혜현': '<자유로부터의 도피>',                           '지수': '나르시시즘의 고통' } },
+            { year: 2025, question: '읽기 전으로 돌아가고 싶은 책',   answers: { '로사': '부정\n베들레햄을 향해 웅크리다',        '혜현': '부정 - 별점이 가장 낮았음\n<예루살렘 이전의 아이히만>', '지수': '부정 - 시간낭비\n예루살렘 이전의 아이히만' } },
+            { year: 2025, question: '다른 사람에게 추천해 줄만한 책', answers: { '로사': '자연에 이름 붙이기',                    '혜현': '<재앙의 지리학>',                               '지수': '자연에 이름 붙이기' } },
+            { year: 2025, question: '올해의 글귀',                    answers: { '로사': '"신좌파 논쟁의 공통분모는 위계질서와 평등, 이론과 실천, 지성과 감정을 열성적으로 대립시킨다는 것이었어요. 페미니스트들은 위계질서와 이론, 지성에 대한 이런 부정적 정의를 영속화하는 경향이 있습니다."', '혜현': '<긴 호흡>\n"우리는 서로의 이야기꾼이 되어야 한다. 적어도 그런 노력을 기울여야 한다. 우리는 우리가 알지 못하는 아름다운 사람들에 대해 알고 싶어 한다. 알아야 할 필요가 있다. 하지만 그것은 하늘을 그리는 것도 같다." (115쪽)', '지수': '' } },
+            { year: 2025, question: '올해의 등장인물 (남성)',          answers: { '로사': '<너무 늦은 시간>에서 여자 묶은 남자???', '혜현': '<페넬로피아드>\n오디세우스',                     '지수': '로사가 고른 남자랑 바란핀 여자의 남편' } },
+            { year: 2025, question: '올해의 등장인물 (여성)',          answers: { '로사': '<사라진 것들>에서 물건 훔치는 남자의 아내', '혜현': '<궤도>\n넬',                               '지수': '페넬로피아드' } },
+            { year: 2025, question: '한 번 만나고 싶은 작가',         answers: { '로사': '앤 패디먼',                             '혜현': '수전 손택',                                      '지수': '수전 손택' } },
+            { year: 2025, question: '다른 저서가 궁금한 작가',        answers: { '로사': '서맨사 허비',                           '혜현': '<궤도>\n서맨사 허비',                           '지수': '궤도 서맨사 허비' } },
+            { year: 2025, question: '절대 만나고 싶지 않은 작가',     answers: { '로사': '<예루살렘 이전의 아이히만>\n베티나 슈탕네트', '혜현': '<커리어 그리고 가정>\n클라우디아 골딘', '지수': '예루살렘 이전의 아이히만\n베티나 슈탕네트' } },
+
+            // 2023
+            { year: 2023, question: '올해의 베스트 책',               answers: { '로사': '작은 것들의 신',                        '혜현': '우리는 여전히 삶을 사랑하는가',                 '지수': '홀로' } },
+            { year: 2023, question: '한 번 만나보고 싶은 작가',       answers: { '로사': '더 좋은 삶을 위한 철학',                '혜현': '홀로 (다니엘 슈라이버)',                         '지수': '더 좋은 삶을 위한 철학' } },
+            { year: 2023, question: '여운상 / 종종 생각나는 책',      answers: { '로사': '파친코',                                '혜현': '전망 좋은 방',                                   '지수': '작은 것들의 신' } },
+            { year: 2023, question: '보람찬 책',                      answers: { '로사': '우리는 여전히 삶을 사랑하는가',         '혜현': '우리들',                                         '지수': '우리는 여전히 삶을 사랑하는가' } },
+            { year: 2023, question: '기대 이하',                      answers: { '로사': '나는 소망한다 내게 금지된 것을',        '혜현': '말리의 일곱개의 달',                            '지수': '알고 있다는 착각' } },
+            { year: 2023, question: '기대 이상',                      answers: { '로사': '전망 좋은 방',                          '혜현': '광기와 우연의 역사 / 파친코',                   '지수': '전망 좋은 방' } },
+            { year: 2023, question: '다른 사람에게 추천해줄 책',      answers: { '로사': '파친코',                                '혜현': '홀로',                                           '지수': '광기와 우연의 역사' } },
+            { year: 2023, question: '읽었다고 자랑할만한 책',         answers: { '로사': '한나 아렌트 평전',                      '혜현': '한나 아렌트 평전',                              '지수': '한나 아렌트 평전' } },
+            { year: 2023, question: '표지가 마음에 드는 책',          answers: { '로사': '우리는 여전히 삶을 사랑하는가',         '혜현': '전망 좋은 방',                                   '지수': '말리의 일곱개의 달' } },
+            { year: 2023, question: '다른 책이 궁금한 작가 (신간 알림)', answers: { '로사': '작은 것들의 신',                     '혜현': '한나 아렌트 평전',                              '지수': '우리는 여전히 삶을 사랑하는가' } },
+            { year: 2023, question: '만나고 싶지 않은 작가',          answers: { '로사': '스토너',                                '혜현': '더 좋은 삶을 위한 철학 (마이클 슈어)',          '지수': '알고 있다는 착각' } },
+
+            // 2022
+            { year: 2022, question: '올해의 베스트 책',               answers: { '로사': '요즘 애들',                             '혜현': '나와 타자들',                                    '지수': '우리 이토록 작은 존재들을 위하여' } },
+            { year: 2022, question: '인기 작가상',                    answers: { '로사': '제사 크리스핀',                         '혜현': '한나 아렌트',                                    '지수': '캐럴라인 냅' } },
+            { year: 2022, question: '한 번 만나보고 싶은 작가',       answers: { '로사': '메리케이 윌머스',                       '혜현': '제사 크리스핀',                                  '지수': '제사 크리스핀' } },
+            { year: 2022, question: '여운상',                         answers: { '로사': '긴긴밤',                                '혜현': '죽은 숙녀들의 사회',                            '지수': '조용한 희망' } },
+            { year: 2022, question: '보람찬 책',                      answers: { '로사': '나와 타자들',                           '혜현': '자유론',                                         '지수': '예루살렘의 아이히만' } },
+            { year: 2022, question: '기대 이하',                      answers: { '로사': '서평의 언어',                           '혜현': '서평의 언어',                                    '지수': '타키니아의 작은 말들' } },
+            { year: 2022, question: '기대 이상',                      answers: { '로사': '요즘 애들',                             '혜현': '어린이라는 세계',                               '지수': '요즘 애들' } },
+            { year: 2022, question: '다른 사람에게 추천해줄 책',      answers: { '로사': '우리 이토록 작은 존재들을 위하여',      '혜현': '요즘 애들',                                      '지수': '우리 이토록 작은 존재들을 위하여' } },
+            { year: 2022, question: '읽었다고 자랑할만한 책',         answers: { '로사': '예루살렘의 아이히만',                   '혜현': '여자를 위한 도시는 없다',                       '지수': '예루살렘의 아이히만' } },
+            { year: 2022, question: '표지가 마음에 드는 책',          answers: { '로사': '',                                      '혜현': '',                                               '지수': '' } },
+            { year: 2022, question: '다른 책이 궁금한 작가 (신간 알림)', answers: { '로사': '앤 헬렌 피터슨',                     '혜현': '한나 아렌트',                                    '지수': '스테파니 린튼' } },
+            { year: 2022, question: '만나고 싶지 않은 작가',          answers: { '로사': '존 스튜어트 밀',                        '혜현': '제사 크리스핀',                                  '지수': '메리케이 윌머스' } },
+        ];
+
+        // ── Firestore 조회 ──────────────────────────────────────
+        async function fetchYears() {
+            const snap = await getDocs(query(YEARS_COL(), orderBy('year', 'desc')));
+            return snap.docs.map(d => Number(d.data().year));
+        }
+
+        async function fetchQuestions() {
+            const snap = await getDocs(query(QS_COL(), orderBy('createdAt', 'asc')));
+            return snap.docs.map(d => ({ id: d.id, ...d.data(), year: Number(d.data().year) }));
+        }
+
+        async function seedIfEmpty() {
+            const [yearSnap, qSnap] = await Promise.all([
+                getDocs(query(YEARS_COL(), limit(1))),
+                getDocs(query(QS_COL(),    limit(1))),
+            ]);
+            if (yearSnap.empty) {
+                for (const y of SEED_YEARS) {
+                    await setDoc(yearDoc(y), { year: y, createdAt: serverTimestamp() });
+                }
+            }
+            if (qSnap.empty) {
+                for (const item of SEED_QUESTIONS) {
+                    await addDoc(QS_COL(), { ...item, createdAt: serverTimestamp() });
+                }
+            }
+        }
+
+        // ── 유틸 ────────────────────────────────────────────────
+        function escHtml(str) {
+            return (str || '')
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // ── 모달 열기 / 닫기 ────────────────────────────────────
+        function openModal(title = '질문 등록') {
+            document.getElementById('modal_title').textContent     = title;
+            document.getElementById('form_submit_btn').textContent = editId ? '수정' : '등록';
+            modal.showModal();
+        }
+
+        function closeModal() {
+            modal.close();
+            document.getElementById('input_question').value  = '';
+            document.getElementById('input_ans_rosa').value  = '';
+            document.getElementById('input_ans_hyh').value   = '';
+            document.getElementById('input_ans_jisu').value  = '';
+            editId = null;
+        }
+
+        // ── 연도 탭 렌더링 ──────────────────────────────────────
+        function renderYearTabs() {
+            const bar    = document.getElementById('year_tab_bar');
+            const addBtn = document.getElementById('add_year_btn');
+            bar.querySelectorAll('.year_tab').forEach(t => t.remove());
+
+            years.forEach(y => {
+                const btn = document.createElement('button');
+                btn.className   = 'year_tab' + (y === activeYear ? ' active' : '');
+                btn.textContent = y;
+                btn.addEventListener('click', () => {
+                    activeYear = Number(y);
+                    renderYearTabs();
+                    renderCards();
+                });
+                bar.insertBefore(btn, addBtn);
+            });
+        }
+
+        // ── 질문 카드 렌더링 ────────────────────────────────────
+        function renderCards() {
+            const grid      = document.getElementById('question_grid');
+            const deleteWrap = document.getElementById('year_delete_wrap');
+            const filtered  = questions.filter(q => q.year === activeYear);
+            grid.innerHTML  = '';
+            deleteWrap.style.display = activeYear ? '' : 'none';
+
+            if (!activeYear) {
+                grid.innerHTML = '<div class="no_data_msg">연도를 먼저 추가해 주세요.</div>';
+                return;
+            }
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="no_data_msg">아직 등록된 질문이 없습니다.<br>질문 등록 버튼으로 첫 질문을 추가해 보세요!</div>';
+                return;
+            }
+
+            filtered.forEach(q => {
+                const answersHtml = MEMBERS.map(m => {
+                    const ans = (q.answers && q.answers[m]) || '';
+                    return `
+                        <div class="answer_row">
+                            <span class="answer_member">${m}</span>
+                            <span class="answer_content${ans ? '' : ' empty'}">${ans ? escHtml(ans) : '-'}</span>
+                        </div>`;
+                }).join('');
+
+                const card = document.createElement('div');
+                card.className = 'question_card';
+                card.innerHTML = `
+                    <div class="question_card_header">
+                        <div class="question_text">${escHtml(q.question)}</div>
+                        <div class="card_btn_group">
+                            <button class="row_btn row_edit_btn" data-id="${q.id}">편집</button>
+                            <button class="row_btn row_del_btn"  data-id="${q.id}">삭제</button>
+                        </div>
+                    </div>
+                    <div class="answer_list">${answersHtml}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ── 질문 등록 버튼 ──────────────────────────────────────
+        document.getElementById('open_register_btn').addEventListener('click', () => {
+            if (!activeYear) { alert('연도를 먼저 선택하거나 추가해주세요.'); return; }
+            editId = null;
+            openModal('질문 등록');
+        });
+
+        // ── 취소 ────────────────────────────────────────────────
+        document.getElementById('form_cancel_btn').addEventListener('click', closeModal);
+
+        // ── 등록 / 수정 ─────────────────────────────────────────
+        document.getElementById('form_submit_btn').addEventListener('click', async () => {
+            const question = document.getElementById('input_question').value.trim();
+            const answers  = {
+                '로사': document.getElementById('input_ans_rosa').value.trim(),
+                '혜현': document.getElementById('input_ans_hyh').value.trim(),
+                '지수': document.getElementById('input_ans_jisu').value.trim(),
+            };
+
+            if (!question) { alert('질문을 입력해주세요.'); return; }
+
+            try {
+                if (editId) {
+                    await updateDoc(qDoc(editId), { question, answers, updatedAt: serverTimestamp() });
+                } else {
+                    await addDoc(QS_COL(), { year: activeYear, question, answers, createdAt: serverTimestamp() });
+                }
+                closeModal();
+                questions = await fetchQuestions();
+                renderCards();
+            } catch (err) {
+                console.error(err);
+                alert('저장에 실패했습니다.');
+            }
+        });
+
+        // ── 카드 이벤트 위임 (편집 / 삭제) ─────────────────────
+        document.getElementById('question_grid').addEventListener('click', async e => {
+            const editBtn = e.target.closest('.row_edit_btn');
+            const delBtn  = e.target.closest('.row_del_btn');
+
+            if (editBtn) {
+                const q = questions.find(x => x.id === editBtn.dataset.id);
+                if (!q) return;
+                document.getElementById('input_question').value  = q.question;
+                document.getElementById('input_ans_rosa').value  = q.answers?.['로사'] || '';
+                document.getElementById('input_ans_hyh').value   = q.answers?.['혜현'] || '';
+                document.getElementById('input_ans_jisu').value  = q.answers?.['지수'] || '';
+                editId = q.id;
+                openModal('질문 편집');
+            }
+
+            if (delBtn) {
+                if (!confirm('이 질문을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.')) return;
+                try {
+                    await deleteDoc(qDoc(delBtn.dataset.id));
+                    questions = await fetchQuestions();
+                    renderCards();
+                } catch (err) {
+                    console.error(err);
+                    alert('삭제에 실패했습니다.');
+                }
+            }
+        });
+
+        // ── 연도 추가 ───────────────────────────────────────────
+        document.getElementById('add_year_btn').addEventListener('click', async () => {
+            const input = prompt('추가할 연도를 입력하세요 (예: 2024)');
+            if (!input) return;
+            const year = parseInt(input.trim(), 10);
+            if (isNaN(year) || year < 2000 || year > 2100) {
+                alert('올바른 연도를 입력해주세요.');
+                return;
+            }
+            if (years.includes(year)) {
+                activeYear = year;
+                renderYearTabs();
+                renderCards();
+                return;
+            }
+            try {
+                await setDoc(yearDoc(year), { year, createdAt: serverTimestamp() });
+                years      = await fetchYears();
+                activeYear = year;
+                renderYearTabs();
+                renderCards();
+            } catch (err) {
+                console.error(err);
+                alert('연도 추가에 실패했습니다.');
+            }
+        });
+
+        // ── 연도 삭제 ───────────────────────────────────────────
+        document.getElementById('year_delete_btn').addEventListener('click', async () => {
+            if (!activeYear) return;
+            if (!confirm(`${activeYear}년도를 삭제하시겠습니까?\n삭제 후 복구 불가능합니다.`)) return;
+
+            try {
+                // 해당 연도 질문 전체 삭제
+                const yearQuestions = questions.filter(q => q.year === activeYear);
+                await Promise.all(yearQuestions.map(q => deleteDoc(qDoc(q.id))));
+
+                // 연도 문서 삭제
+                await deleteDoc(yearDoc(activeYear));
+
+                // 상태 갱신
+                [years, questions] = await Promise.all([fetchYears(), fetchQuestions()]);
+                activeYear = years.length > 0 ? Number(years[0]) : null;
+                renderYearTabs();
+                renderCards();
+            } catch (err) {
+                console.error(err);
+                alert('삭제에 실패했습니다.');
+            }
+        });
+
+        // ── 스크롤 헤더 ─────────────────────────────────────────
+        const wrap = document.querySelector('.wrap');
+        window.addEventListener('scroll', () => wrap.classList.toggle('scrolled', window.scrollY > 10));
+
+        // ── 초기 실행 ───────────────────────────────────────────
+        await seedIfEmpty();
+        [years, questions] = await Promise.all([fetchYears(), fetchQuestions()]);
+        if (years.length > 0) activeYear = Number(years[0]);
+        renderYearTabs();
+        renderCards();
+    </script>
+</body>
+
+</html>
